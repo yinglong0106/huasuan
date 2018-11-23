@@ -15,6 +15,7 @@ import map from '@/components/map'
 import moneyDetail from '@/my-moneyDetails/index' //零钱明细
 import withdraw from '@/my-tixian/index' //提现记录
 import detail from '@/detail/index' //作品详情
+import singleDetail from '@/singleDetail/singleDetail' //个人详情
 Vue.use(Router)
 
 let router = new Router({
@@ -125,6 +126,15 @@ let router = new Router({
       component:detail,
       meta:{
         title:'作品详情'
+      },
+      
+    },
+    {
+      path:'/singleDetail',
+      name:'singleDetail',
+      component:singleDetail,
+      meta:{
+        title:'信息详情'
       },
       
     },

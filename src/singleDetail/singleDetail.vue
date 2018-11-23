@@ -1,10 +1,8 @@
 <template>
   <div class="home">
-    <div class="shareImg" v-if="showShareImg" @click="showShareImg=false"><img src="/static/img/share1.png" alt=""></div>
-    <swiper :options="swiperOption">
-      <swiper-slide  class="slide" v-for="(item,index) in list" :key="index">
-        <img :src="item.img_url" alt="" class="bg"/>
-        <ul class="left">
+    <!-- <div class="shareImg" v-if="showShareImg" @click="showShareImg=false"><img src="/static/img/share1.png" alt=""></div> -->
+        <!-- <img :src="item.img_url" alt="" class="bg"/> -->
+        <!-- <ul class="left">
           <li @click="focus(item)">
             <div>
               <img :src="item.user_img" alt="" class="top">
@@ -13,7 +11,7 @@
               
             </div>
           </li>
-          <!-- 点赞 -->
+ 
           <li @click="zan(item)">
             <img src="../../static/img/home11.png" alt="" class="xin" v-if="item.is_like">
             <img src="../../static/img/home1.png" alt="" class="xin" v-else>
@@ -27,9 +25,9 @@
             <img src="../../static/img/home3.png" alt="" class="fen">
             <span class="xin_font">{{item.share_number}}</span>
           </li>
-        </ul>
+        </ul> -->
         <!-- 音乐 -->
-        <li class="mm">
+        <!-- <li class="mm">
           <img src="../../static/img/mm.gif" alt="">
           <audio loop class="musicfx"  controls="controls" style="opacity:0;">
               <source class="source" autoplay :src="music_url" type="audio/mp3" ref="musicfx"/>
@@ -41,11 +39,9 @@
           <li class="right3" v-if="item.address != null"> <img src="../../static/img/map.png" alt="" class="map"><span>{{item.address}}</span></li>
           <li class="right4"> <img src="../../static/img/money.png" alt="" class="money"><span>{{item.start_salary}}~{{item.top_salary}}元</span></li>
           <li class="right5">{{item.descript}}</li>
-        </ul>
-      </swiper-slide>
-    </swiper>
+        </ul> -->
     <!-- 分享 -->
-    <div class="fenx" v-if="fenx">
+    <!-- <div class="fenx" v-if="fenx">
       <h1>分享到</h1>
       <ul>
         <li>
@@ -67,10 +63,10 @@
       <h3 @click="fenx = false">
         取消
       </h3>
-    </div>
+    </div> -->
 
     <!-- 红包 -->
-    <div class="mask" v-if="showEllop">
+    <!-- <div class="mask" v-if="showEllop">
         <div class="ellenvent">
           <div class="el_top">
               <img :src="redInfo.user_img" alt="">
@@ -85,7 +81,7 @@
           </div>
         </div>
     </div>
-    <BNai :idx="0"></BNai>
+    <BNai :idx="0"></BNai> -->
   </div>
 </template>
 
@@ -126,127 +122,19 @@ export default {
       showShareImg:false, //展示分享图片信息
       shareUrl:'',
       type:1, //类型:1为首页和企业列表页,2为信息详情,3为企业详情
-      shareId:'' , //当前企业类型
-      shareInfo : null,
-      config : null
-
+      shareId:''  //当前企业类型
     }
   },
  
   created () {
-    //初始请求数据
-    this.initData()
   },
   mounted(){
     //播放器控制
-        // $('.mm').click(function(){
-        //   console.log("点击播放音乐")
-        //     // event.stopPropagation();//防止冒泡
-        //     if($(".musicfx")[that.currentIndex].paused){ //如果当前是暂停状态
-        //         audio.play(); //播放
-        //         return;
-        //     }else{
-        //         //当前是播放状态
-        //         audio.pause(); //暂停''
-        //     }
-        // })
         var that = this
-      that.wxShare()
+        that.initData()
          
   },
 
-
-  beforeMount(){
-    var that = this
-    //初始化轮播插件配置
-    that.swiperOption = {
-          notNextTick: true,
-          // 循环
-          // loop: true,
-          // 设定初始化时slide的索引
-          initialSlide: 0,
-          observer:true,
-          observeParents:true,
-          // 自动播放
-          // autoplay: {
-          //   delay: 3000,
-          //   stopOnLastSlide: false,
-          //   disableOnInteraction: true
-          // },
-          // 滑动速度
-          speed: 600,
-          // 滑动方向 horizontal
-          direction: 'vertical',
-          // 小手掌抓取滑动
-          grabCursor: true,
-         
-          on: {
-             // 滑动之后回调函数
-            slideChangeTransitionEnd: function () {
-              console.log("切换时")
-              console.log(that)
-              console.log(this.activeIndex) // 切换结束时，告诉我现在是第几个slide
-              that.currentIndex = this.activeIndex
-              that.music_url = that.list[this.activeIndex].music_url
-              that.showEllop = that.list[this.activeIndex].is_redpacket==1?true:false
-              that.redInfo = that.list[this.activeIndex] //当前企业红包信息
-              that.type = 1
-              if((that.list.length-1) == that.currentIndex){
-                that.page++
-                console.log("调用加载更多")
-                that.initData()
-              }
-            },
-            // 向上滑动
-            slidePrevTransitionEnd:function(){
-              console.log("向上滑动：")
-              
-              console.log(this)
-              that.prv = that.currentIndex+1
-               $(".musicfx")[that.prv].pause()
-              $(".musicfx")[this.activeIndex].play()
-            },
-            // 向下滑动
-            slideNextTransitionEnd:function(){
-              console.log("向下滑动：")
-              console.log(this)
-              that.prv = that.currentIndex-1
-               $(".musicfx")[that.prv].pause()
-              $(".musicfx")[this.activeIndex].play()
-            },
-          },
-          // 左右点击
-          navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev'
-          },
-          // 分页器设置
-          pagination: {
-            el: '.swiper-pagination',
-            clickable: true,
-            type: 'custom',
-            // 自定义分页器样式
-            renderCustom: function (swiper, current, total) {
-              const activeColor = '#168fed'
-              const normalColor = '#aeaeae'
-              let color = ''
-              let paginationStyle = ''
-              let html = ''
-              for (let i = 1; i <= total; i++) {
-                if (i === current) {
-                  color = activeColor
-                } else {
-                  color = normalColor
-                }
-                paginationStyle = `background:${color};opacity:1;margin-right:20px;width:20px;height:20px;transform:skew(15deg);border-radius:0;`
-                html += `<span class="swiper-pagination-bullet" style=${paginationStyle}></span>`
-              }
-              return html
-            }
-          },
-          
-        }
-  },
   watch:{
      music_url: function (newVal, oldVal) {
        var that = this
@@ -259,17 +147,16 @@ export default {
     }
   },
   methods: {
-    
     //微信分享
     wxShare(){
           var globalConfig = {},that = this;
           globalConfig.jssdkUrl = "/hsapi/index.php";
           var pars = {};
-          pars.c = "Home";
-          pars.action = "shareConfig"; 
+          pars.c = 'Home';
+          pars.action = 'shareConfig'; 
           pars.link_url = location.href;
-          pars.type = that.type;
-          pars.id = that.shareId;
+          pars.type = 2;
+          pars.id = that.$route.params.id;
           $.ajax({
             type : "POST",
             url: globalConfig.jssdkUrl,
@@ -325,28 +212,20 @@ export default {
                 }
               });
     },
+
     //初始化请求数据
     initData(){
       var url = location.href,that = this
-      apiRequest.post('/index.php',{c: 'Home', action: 'index', link_url: url, module_id: 0, uid: that.$local.uid, rows: that.rows, page: that.page},function(res){
+      that.shareId = this.$route.params.id
+      console.log({c: 'Message', action: 'detail', link_url: url, message_id: that.shareId, uid: that.$local.uid, rows: that.rows, page: that.page})
+      apiRequest.post('/index.php',{c: 'Message', action: 'detail', link_url: url, message_id: that.shareId, uid: that.$local.uid, rows: that.rows, page: that.page},function(res){
           // that.list = res.result
           console.log("初始数据")
+        
           console.log(res)
           that.showEllop = res.result[0].is_redpacket==1?true:false
           if(that.page == 1){
             that.list = res.result
-             that.music_url = that.list[0].music_url
-             that.$nextTick(function(){
-               $(".musicfx")[0].play()
-               document.addEventListener("WeixinJSBridgeReady", function () { 
-                  $(".musicfx")[0].play() 
-              }, false);
-             })
-          }
-          else{
-            if(res.code == 200){
-              that.list =  that.list.concat(res.result)
-            } 
           }
 
       })
@@ -360,11 +239,9 @@ export default {
     //分享
     fen (item) {
       // this.fenx = true
-      // this.showShareImg=true
-      console.log("fem")
-      this.$router.push({name:'/singleDetail',params:{id:item.id}})
-      // this.type = 2
-      // this.shareId = item.id
+      this.showShareImg=true
+      this.type = 2
+      this.shareId = item.id
     },
     //点击关注
     focus(item){
@@ -726,3 +603,4 @@ body {
 }
 
 </style>
+
