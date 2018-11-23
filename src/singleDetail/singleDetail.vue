@@ -1,47 +1,51 @@
 <template>
   <div class="home">
-    <!-- <div class="shareImg" v-if="showShareImg" @click="showShareImg=false"><img src="/static/img/share1.png" alt=""></div> -->
-        <!-- <img :src="item.img_url" alt="" class="bg"/> -->
-        <!-- <ul class="left">
-          <li @click="focus(item)">
+    <div class="shareImg" v-if="showShareImg" @click="showShareImg=false"><img src="/static/img/share1.png" alt=""></div>
+    <swiper>
+      <swiper-slide  class="slide">
+        <img :src="list.img_url" alt="" class="bg"/>
+        <ul class="left">
+          <li @click="focus(list)">
             <div>
-              <img :src="item.user_img" alt="" class="top">
-              <img src="../../static/img/g.png" alt="" v-if="item.is_focus" class="jia" style="width:0.5rem;height:0.5rem;">
+              <img :src="list.user_img" alt="" class="top">
+              <img src="../../static/img/g.png" alt="" v-if="list.is_focus" class="jia" style="width:0.5rem;height:0.5rem;">
               <img src="../../static/img/jia.png"  v-else class="jia">
               
             </div>
           </li>
- 
-          <li @click="zan(item)">
-            <img src="../../static/img/home11.png" alt="" class="xin" v-if="item.is_like">
+          <!-- 点赞 -->
+          <li @click="zan(list)">
+            <img src="../../static/img/home11.png" alt="" class="xin" v-if="list.is_like">
             <img src="../../static/img/home1.png" alt="" class="xin" v-else>
-            <span class="xin_font">{{item.focus_number}}</span>
+            <span class="xin_font">{{list.focus_number}}</span>
           </li>
-          <li  @click="callPhone(item.telephone)">
+          <li  @click="callPhone(list.telephone)">
             <img src="../../static/img/home22.png" alt="" class="iphone">
             <span class="xin_font">电话</span>
           </li>
-          <li @click="fen(item)">
+          <li @click="fen(list)">
             <img src="../../static/img/home3.png" alt="" class="fen">
-            <span class="xin_font">{{item.share_number}}</span>
+            <span class="xin_font">{{list.share_number}}</span>
           </li>
-        </ul> -->
+        </ul>
         <!-- 音乐 -->
-        <!-- <li class="mm">
+        <li class="mm">
           <img src="../../static/img/mm.gif" alt="">
           <audio loop class="musicfx"  controls="controls" style="opacity:0;">
               <source class="source" autoplay :src="music_url" type="audio/mp3" ref="musicfx"/>
           </audio>
         </li>
         <ul class="right">
-          <li class="right1">#{{item.module_name}}#</li>
-          <li class="right2">{{item.username}}</li>
-          <li class="right3" v-if="item.address != null"> <img src="../../static/img/map.png" alt="" class="map"><span>{{item.address}}</span></li>
-          <li class="right4"> <img src="../../static/img/money.png" alt="" class="money"><span>{{item.start_salary}}~{{item.top_salary}}元</span></li>
-          <li class="right5">{{item.descript}}</li>
-        </ul> -->
+          <li class="right1">#{{list.module_name}}#</li>
+          <li class="right2">{{list.username}}</li>
+          <li class="right3" v-if="list.address != null"> <img src="../../static/img/map.png" alt="" class="map"><span>{{list.address}}</span></li>
+          <li class="right4"> <img src="../../static/img/money.png" alt="" class="money"><span>{{list.start_salary}}~{{list.top_salary}}元</span></li>
+          <li class="right5">{{list.descript}}</li>
+        </ul>
+      </swiper-slide>
+    </swiper>
     <!-- 分享 -->
-    <!-- <div class="fenx" v-if="fenx">
+    <div class="fenx" v-if="fenx">
       <h1>分享到</h1>
       <ul>
         <li>
@@ -63,10 +67,10 @@
       <h3 @click="fenx = false">
         取消
       </h3>
-    </div> -->
+    </div>
 
     <!-- 红包 -->
-    <!-- <div class="mask" v-if="showEllop">
+    <div class="mask" v-if="showEllop">
         <div class="ellenvent">
           <div class="el_top">
               <img :src="redInfo.user_img" alt="">
@@ -81,7 +85,7 @@
           </div>
         </div>
     </div>
-    <BNai :idx="0"></BNai> -->
+    <!-- <BNai :idx="0"></BNai> -->
   </div>
 </template>
 
@@ -95,8 +99,6 @@ import { setTimeout } from 'timers';
 import '@/assets/css/home.css'
 import Canvas2Image from '@/library/canvas2image.js'
 import { wxShare } from '@/library/share'  //分享文件
-
-var currentIndex = 0 //当前的索引值
 export default {
   name: 'home',
   components: {
@@ -131,20 +133,10 @@ export default {
   mounted(){
     //播放器控制
         var that = this
+        console.log('信息页面')
+        console.log(this.$route.query.id)
         that.initData()
          
-  },
-
-  watch:{
-     music_url: function (newVal, oldVal) {
-       var that = this
-       if(this.currentIndex = 0){
-         if(this.music_url){
-           $(".musicfx")[0].play()
-         }
-       }
-      
-    }
   },
   methods: {
     //微信分享
@@ -156,7 +148,7 @@ export default {
           pars.action = 'shareConfig'; 
           pars.link_url = location.href;
           pars.type = 2;
-          pars.id = that.$route.params.id;
+          pars.id = that.$route.query.id;
           $.ajax({
             type : "POST",
             url: globalConfig.jssdkUrl,
@@ -192,7 +184,7 @@ export default {
                         link: data.result.shareInfo.link,
                         imgUrl: data.result.shareInfo.imgUrl,
                         success: function() {
-
+                          that.successShare()
                         }
                       });
                       wx.onMenuShareTimeline({
@@ -200,7 +192,7 @@ export default {
                         link: data.result.shareInfo.link,
                         imgUrl: data.result.shareInfo.imgUrl,
                         success: function() {
-
+                           that.successShare()
                         }
                       });	
                   })
@@ -213,21 +205,27 @@ export default {
               });
     },
 
+    //请求微信成功分享
+    successShare(){
+      var that = this
+      apiRequest.post('/index.php',{c: 'User', action: 'share', link_type: 1,link_id:that.$route.query.id,uid:that.$local.uid },function(res){
+           Toast(res.msg);
+           that.showShareImg = false
+         that.list.share_number =  that.list.share_number +1
+      })
+    },
+
     //初始化请求数据
     initData(){
       var url = location.href,that = this
-      that.shareId = this.$route.params.id
-      console.log({c: 'Message', action: 'detail', link_url: url, message_id: that.shareId, uid: that.$local.uid, rows: that.rows, page: that.page})
-      apiRequest.post('/index.php',{c: 'Message', action: 'detail', link_url: url, message_id: that.shareId, uid: that.$local.uid, rows: that.rows, page: that.page},function(res){
-          // that.list = res.result
-          console.log("初始数据")
-        
+      that.shareId = this.$route.query.id
+  
+      apiRequest.post('/index.php',{c: 'Message', action: 'detail', link_url: url, message_id: that.shareId, uid: that.$local.uid},function(res){
+          that.list = res.result
+          that.wxShare()
+           console.log('信息页面')
+           console.log(that.$route.query.id)
           console.log(res)
-          that.showEllop = res.result[0].is_redpacket==1?true:false
-          if(that.page == 1){
-            that.list = res.result
-          }
-
       })
     },
     //拨打电话
@@ -239,6 +237,7 @@ export default {
     //分享
     fen (item) {
       // this.fenx = true
+      console.log(location.href)
       this.showShareImg=true
       this.type = 2
       this.shareId = item.id
@@ -424,8 +423,7 @@ body {
         align-items: center;
       }
     }
-  .swiper-container {
-    height: 100% !important;
+
     .swiper-wrapper {
       height: 100% !important;
       .swiper-slide {
@@ -581,7 +579,6 @@ body {
         }
       }
     }
-  }
   .musicfx{
     position:absolute;
     top:0;

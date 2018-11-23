@@ -31,7 +31,7 @@
       <span :class="{active: active == 2}" @click="active = 2">喜欢123</span> -->
     </h3>
     <!-- 内容 -->
-    <mt-loadmore :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
+    <mt-loadmore :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore" style="color:#fff;">
       <ul>
         <li v-for="(item,index) in list" :key="index">
           <img :src="item.img_url" alt="" class="bg"/>
@@ -62,7 +62,8 @@ export default {
       list: null,//企业作品列表
       allLoaded:false,  //可以上拉加载标志
       page:1,  //当前页数
-      rows:5  //每页列表数量
+      rows:5,  //每页列表数量
+      showShareImg:false
     }
   },
   created () {
@@ -72,6 +73,80 @@ export default {
 
   },
   methods: {
+     //微信分享
+    wxShare(){
+          var globalConfig = {},that = this;
+          globalConfig.jssdkUrl = "/hsapi/index.php";
+          var pars = {};
+          pars.c = 'Home';
+          pars.action = 'shareConfig'; 
+          pars.link_url = location.href;
+          pars.type = 3;
+          pars.id = that.$route.query.id;
+          $.ajax({
+            type : "POST",
+            url: globalConfig.jssdkUrl,
+            dataType : "json",
+            data:pars,
+            success : function(data){
+            console.log(data);
+            if(data.code == 200){
+              wx.config(data.result.config);
+                    wx.ready(function(){
+                      wx.hideMenuItems({
+                        menuList: [
+                          'menuItem:readMode', // 阅读模式
+                          // 'menuItem:share:timeline', // 分享到朋友圈
+                          'menuItem:copyUrl', // 复制链接
+                          "menuItem:share:qq",//qq
+                          "menuItem:favorite",//收藏
+                          'menuItem:share:QZone',//qq空间
+                          'menuItem:exposeArticle',//举报
+                          'menuItem:openWithQQBrowser',//浏览器打开
+                          "menuItem:share:email",//邮箱
+                        ],
+                        success: function (res) {
+                          //alert('已隐藏“阅读模式”，“分享到朋友圈”，“复制链接”等按钮');
+                        },
+                        fail: function (res) {
+                          //alert(JSON.stringify(res));
+                        }
+                      });
+                      wx.onMenuShareAppMessage({
+                        title: data.result.shareInfo.title,
+                        desc: data.result.shareInfo.desc,
+                        link: data.result.shareInfo.link,
+                        imgUrl: data.result.shareInfo.imgUrl,
+                        success: function() {
+                          that.successShare()
+                        }
+                      });
+                      wx.onMenuShareTimeline({
+                        title: data.result.shareInfo.title,
+                        link: data.result.shareInfo.link,
+                        imgUrl: data.result.shareInfo.imgUrl,
+                        success: function() {
+                           that.successShare()
+                        }
+                      });	
+                  })
+                }
+            },
+            error:function(obj){
+                  //alert("网络出错");
+                  // alert(JSON.stringify(obj));
+                }
+              });
+    },
+
+     //请求微信成功分享
+    successShare(){
+      var that = this
+      apiRequest.post('/index.php',{c: 'User', action: 'share', link_type: 2,link_id:that.$route.query.id,uid:that.$local.uid },function(res){
+           Toast(res.msg);
+      })
+    },
+
     //加载更多
     loadBottom(){
       var that = this
@@ -92,6 +167,7 @@ export default {
           // that.list = res.result
           console.log("获取企业详情初始数据")
           console.log(res)
+          that.wxShare()
           that.shopInfo = res.result
           that.list = res.result.list
           

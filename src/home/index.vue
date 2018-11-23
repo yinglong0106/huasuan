@@ -127,7 +127,7 @@ export default {
       shareUrl:'',
       type:1, //类型:1为首页和企业列表页,2为信息详情,3为企业详情
       shareId:'' , //当前企业类型
-      shareInfo : null,
+      shareInfo : null,  //分享信息
       config : null
 
     }
@@ -359,12 +359,11 @@ export default {
 
     //分享
     fen (item) {
-      // this.fenx = true
-      // this.showShareImg=true
-      console.log("fem")
-      this.$router.push({name:'/singleDetail',params:{id:item.id}})
-      // this.type = 2
-      // this.shareId = item.id
+      // this.fenx = true 
+      // this.showShareImg=true //显示分享图片
+      this.$router.push({name:'singleDetail',query:{id:item.id}})
+      // this.type = 2 //定义分享id为个人id
+      // this.shareId = item.id //当前分享信息的id
     },
     //点击关注
     focus(item){
