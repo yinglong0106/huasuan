@@ -48,6 +48,7 @@
 <script>
 import Re from '@/components/return'
 import apiRequest from '@/library/apiRequest'
+import wx from 'weixin-js-sdk';
 export default {
   name: 'enterpriseDetails',
   components: {
@@ -76,7 +77,7 @@ export default {
      //微信分享
     wxShare(){
           var globalConfig = {},that = this;
-          globalConfig.jssdkUrl = "/hsapi/index.php";
+          globalConfig.jssdkUrl = "/index.php";
           var pars = {};
           pars.c = 'Home';
           pars.action = 'shareConfig'; 
@@ -85,10 +86,11 @@ export default {
           pars.id = that.$route.query.id;
           $.ajax({
             type : "POST",
-            url: globalConfig.jssdkUrl,
+            url: that.$local.serverHost+globalConfig.jssdkUrl,
             dataType : "json",
             data:pars,
             success : function(data){
+              console.log("分享函数")
             console.log(data);
             if(data.code == 200){
               wx.config(data.result.config);

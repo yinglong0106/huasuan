@@ -99,6 +99,7 @@ import { setTimeout } from 'timers';
 import '@/assets/css/home.css'
 import Canvas2Image from '@/library/canvas2image.js'
 import { wxShare } from '@/library/share'  //分享文件
+import wx from 'weixin-js-sdk';
 
 var currentIndex = 0 //当前的索引值
 export default {
@@ -263,7 +264,7 @@ export default {
     //微信分享
     wxShare(){
           var globalConfig = {},that = this;
-          globalConfig.jssdkUrl = "/hsapi/index.php";
+          globalConfig.jssdkUrl = "/index.php";
           var pars = {};
           pars.c = "Home";
           pars.action = "shareConfig"; 
@@ -272,10 +273,11 @@ export default {
           pars.id = that.shareId;
           $.ajax({
             type : "POST",
-            url: globalConfig.jssdkUrl,
+            url: that.$local.serverHost+globalConfig.jssdkUrl,
             dataType : "json",
             data:pars,
             success : function(data){
+            console.log("分享函数")
             console.log(data);
             if(data.code == 200){
               wx.config(data.result.config);
@@ -305,7 +307,7 @@ export default {
                         link: data.result.shareInfo.link,
                         imgUrl: data.result.shareInfo.imgUrl,
                         success: function() {
-
+                          
                         }
                       });
                       wx.onMenuShareTimeline({

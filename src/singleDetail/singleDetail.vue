@@ -99,6 +99,8 @@ import { setTimeout } from 'timers';
 import '@/assets/css/home.css'
 import Canvas2Image from '@/library/canvas2image.js'
 import { wxShare } from '@/library/share'  //分享文件
+import wx from 'weixin-js-sdk';
+
 export default {
   name: 'home',
   components: {
@@ -142,7 +144,7 @@ export default {
     //微信分享
     wxShare(){
           var globalConfig = {},that = this;
-          globalConfig.jssdkUrl = "/hsapi/index.php";
+          globalConfig.jssdkUrl = "/index.php";
           var pars = {};
           pars.c = 'Home';
           pars.action = 'shareConfig'; 
@@ -151,7 +153,7 @@ export default {
           pars.id = that.$route.query.id;
           $.ajax({
             type : "POST",
-            url: globalConfig.jssdkUrl,
+            url: that.$local.serverHost+globalConfig.jssdkUrl,
             dataType : "json",
             data:pars,
             success : function(data){
