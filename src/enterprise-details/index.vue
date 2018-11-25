@@ -64,16 +64,57 @@ export default {
       allLoaded:false,  //可以上拉加载标志
       page:1,  //当前页数
       rows:5,  //每页列表数量
-      showShareImg:false
+      showShareImg:false,
+      id:'' //企业id
     }
   },
+   beforeCreate() {
+     var that = this
+            /**
+             * url追加参数
+             */
+          //   var currentUrl = window.location.href.split('?')[1].substring(1)
+          //   console.log(currentUrl)
+          //   var id=currentUrl.split("&")[0].split('=')[1]
+          //  this.$router.push({name: 'enterpriseDetails',
+          //     query: {
+          //       id: id
+          //     }
+          //   })
+          
+            // function addUrlPara(name, value) {
+            //     var currentUrl = window.location.href.split('#')[0];
+            //     if(/tid/.test(currentUrl)){
+            //         return currentUrl;
+            //     }
+           
+            //     if (/\?/g.test(currentUrl)) {
+            //         if (/name=[-\w]{4,25}/g.test(currentUrl)) {
+            //             currentUrl = currentUrl.replace(/name=[-\w]{4,25}/g, name + "=" + value);
+            //         } else {
+            //             currentUrl += "&" + name + "=" + value;
+            //         }
+            //     } else {
+            //         currentUrl += "?" + name + "=" + value;
+            //     }
+            //     if (window.location.href.split('#')[1]) {
+            //         window.location.href = currentUrl + '#' + window.location.href.split('#')[1];
+            //     } else {
+            //         window.location.href = currentUrl;
+            //     }
+            //     return window.location.href;
+            // }
+        
+        },  
   created () {
-    console.log(this.$route.query.id)
+    console.log(location.href)
     var that = this
+    that.id = this.$route.query.id
     that.initData()
-
+   
   },
   methods: {
+
      //微信分享
     wxShare(){
           var globalConfig = {},that = this;
@@ -83,7 +124,7 @@ export default {
           pars.action = 'shareConfig'; 
           pars.link_url = location.href;
           pars.type = 3;
-          pars.id = that.$route.query.id;
+          pars.id = that.id;
           $.ajax({
             type : "POST",
             url: that.$local.serverHost+globalConfig.jssdkUrl,
@@ -144,7 +185,7 @@ export default {
      //请求微信成功分享
     successShare(){
       var that = this
-      apiRequest.post('/index.php',{c: 'User', action: 'share', link_type: 2,link_id:that.$route.query.id,uid:that.$local.uid },function(res){
+      apiRequest.post('/index.php',{c: 'User', action: 'share', link_type: 2,link_id:that.id,uid:that.$local.uid },function(res){
            Toast(res.msg);
       })
     },
@@ -153,7 +194,7 @@ export default {
     loadBottom(){
       var that = this
       that.page++
-      apiRequest.post('/index.php',{c: 'Home', action: 'shopWorkList', rows:that.rows,page:that.page,shop_id:that.$route.query.id},function(res){
+      apiRequest.post('/index.php',{c: 'Home', action: 'shopWorkList', rows:that.rows,page:that.page,shop_id:that.id},function(res){
           // that.list = res.result
           that.list = that.list.concat(res.result)
           
@@ -164,8 +205,8 @@ export default {
     initData(){
       var that = this,url = location.href
       console.log("企业id")
-      console.log(that.$route.query.id)
-      apiRequest.post('/index.php',{c: 'Home', action: 'enterpriseDetail', uid: that.$local.uid,link_url:url,shop_id:that.$route.query.id},function(res){
+      console.log(that.id)
+      apiRequest.post('/index.php',{c: 'Home', action: 'enterpriseDetail', uid: that.$local.uid,link_url:url,shop_id:that.id},function(res){
           // that.list = res.result
           console.log("获取企业详情初始数据")
           console.log(res)
@@ -180,7 +221,7 @@ export default {
     follow () {
       var that = this
       console.log("点击关注")
-      apiRequest.post('/index.php',{c: 'User', action: 'follow', uid: that.$local.uid,focus_id:that.$route.query.id,focus_type:2},function(res){
+      apiRequest.post('/index.php',{c: 'User', action: 'follow', uid: that.$local.uid,focus_id:that.id,focus_type:2},function(res){
           // that.list = res.result
           console.log("关注企业")
           console.log(res)

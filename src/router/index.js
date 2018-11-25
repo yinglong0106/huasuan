@@ -30,7 +30,7 @@ let router = new Router({
       }
     },
     {
-      path: '/enterpriseDetails',
+      path: '/enterpriseDetails/:id?/:tid?',
       name: 'enterpriseDetails',
       component: enterpriseDetails,
       meta:{
@@ -130,7 +130,7 @@ let router = new Router({
       
     },
     {
-      path:'/singleDetail',
+      path:'/singleDetail/:id?/:tid?',
       name:'singleDetail',
       component:singleDetail,
       meta:{

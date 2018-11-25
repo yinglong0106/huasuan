@@ -164,7 +164,7 @@ export default {
     
     //跳转企业详情
     details (e) {
-      this.$router.push({path: '/enterpriseDetails',
+      this.$router.push({name: 'enterpriseDetails',
         query: {
           id: e
         }
@@ -176,6 +176,7 @@ export default {
 
 <style lang="less" scoped>
 .enterprise {
+    padding-bottom:55px;
   .br {
     position: relative;
     margin: .8rem auto 0;

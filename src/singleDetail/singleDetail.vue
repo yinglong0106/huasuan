@@ -141,6 +141,7 @@ export default {
          
   },
   methods: {
+
     //微信分享
     wxShare(){
           var globalConfig = {},that = this;

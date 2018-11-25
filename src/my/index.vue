@@ -24,10 +24,10 @@
       <!-- <div class="two" @click="footprint">
         <img src="../../static/img/my_zj.png" alt="" class="my_zj">
       </div> -->
-      <div class="two" @click="money">
+      <div class="two" @click="money"  v-if="userType == 'user'">
         <img src="../../static/img/money.png" alt="" class="my_money">
       </div>
-      <div class="two" @click="code">
+      <div class="two" @click="code"  v-if="userType == 'user'">
         <img src="../../static/img/my_code.png" alt="" class="my_code">
       </div>
     </div>
@@ -46,7 +46,7 @@
       <span :class="{active: active == 2}" @click="active = 2">喜欢{{myfocus.length}}</span>
     </h3>
     <!-- 内容 -->
-    <mt-loadmore :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
+    <mt-loadmore :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore" style="color:#fff !important;">
       <ul wx:if="proList">
         <li v-for="(item,index) in proList" :key="index" @click="toDetail(item)">
           <img :src="item.img_url" alt="" class="bg"/>
