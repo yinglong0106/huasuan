@@ -15,8 +15,10 @@ import MintUI from 'mint-ui';
 import 'mint-ui/lib/style.css';
 import Local from '@/library/local'
 import Vuex from 'vuex'
-
-
+import { Swipe, SwipeItem } from 'mint-ui';
+import VueTouch from 'vue-touch'
+Vue.component(Swipe.name, Swipe);
+Vue.component(SwipeItem.name, SwipeItem);
 Vue.use(Vuex)
 Vue.use(Local)
 Vue.component(picker.name, picker)
@@ -27,6 +29,7 @@ Vue.use(BaiduMap, {
   ak: 'DwUrm4OX62qaGdlN8or9u1IeMMavFOSP'
 })
 
+Vue.use(VueTouch, {name: 'v-touch'})
 Vue.prototype.axios = axios
 Vue.prototype.qs = Qs
 axios.defaults.withCredentials = true

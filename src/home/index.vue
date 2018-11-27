@@ -3,14 +3,21 @@
     <div class="shareImg" v-if="showShareImg" @click="showShareImg=false"><img src="/static/img/share1.png" alt=""></div>
     <swiper :options="swiperOption">
       <swiper-slide  class="slide" v-for="(item,index) in list" :key="index">
-        <img :src="item.img_url" alt="" class="bg"/>
+       
+        <!-- <img style="height:100%;" :src="item.img_url" alt="" class="bg" /> -->
+         <v-touch style="overflow:hidden;position:relative" ref="home" @swipeup="slideNext " @swipedown="slidePrev">
+           <div class="in-prev-cache" style="width:100%;position: absolute;flex-grow: 1;left:-100vw;"  :key="index" v-for="(item,index) in prevCache"><img :src="item" alt=""></div>
+           <div><img :src="current" alt=""></div>
+           <div class="in-next-cache" style="width:100%;position: absolute;flex-grow: 1;left:100vw;" :key="index" v-for="(item,index) in nextCache"><img :src="item" alt=""></div>
+         </v-touch>
+
+
         <ul class="left">
           <li @click="focus(item)">
             <div>
               <img :src="item.user_img" alt="" class="top">
               <img src="../../static/img/g.png" alt="" v-if="item.is_focus" class="jia" style="width:0.5rem;height:0.5rem;">
               <img src="../../static/img/jia.png"  v-else class="jia">
-              
             </div>
           </li>
           <!-- 点赞 -->
@@ -129,8 +136,11 @@ export default {
       type:1, //类型:1为首页和企业列表页,2为信息详情,3为企业详情
       shareId:'' , //当前企业类型
       shareInfo : null,  //分享信息
-      config : null
-
+      config : null,
+      content:["/static/img/a.png","/static/img/b.png","/static/img/c.png"],
+      currentIndex: 0,
+      cacheLimit: 1,
+      sliding: false,
     }
   },
  
@@ -155,7 +165,36 @@ export default {
       that.wxShare()
          
   },
-
+ computed: {
+      hasNext() {
+        return this.currentIndex + 1 < this.content.length;
+      },
+      current() {
+        return this.content[this.currentIndex];
+      },
+      prevCache() {
+        const endIdx = this.currentIndex;
+        const startIdx = Math.max(0, endIdx - this.cacheLimit);
+        return this.content.slice(startIdx, endIdx);
+      },
+      nextCache() {
+        const startIdx = this.currentIndex + 1;
+        const endIdx = Math.min(this.content.length, startIdx + this.cacheLimit);
+        return this.content.slice(startIdx, endIdx);
+      },
+      hotelListStyle() {
+        const clientHeight = document.documentElement.clientHeight;
+        if (this.$local.checkBrowser() === 0) {
+          return {
+            height: `${clientHeight - 50}px`
+          }
+        } else {
+          return {
+            height: `${clientHeight - 95}px`
+          }
+        }
+      }
+    },
 
   beforeMount(){
     var that = this
@@ -351,6 +390,7 @@ export default {
             } 
           }
 
+
       })
     },
     //拨打电话
@@ -459,7 +499,40 @@ export default {
             callback && callback()
         });
     }
-  }
+  },
+
+  slideNext() {
+        if (!this.sliding && this.hasNext) {
+          const nextCard = this.nextCache[0];
+          this.sliding = true;
+          $(`#${this.current.id}`).animate({
+            top: '-100vh'
+          }, 500);
+          this.slideToCurrent(nextCard.id, 'next');
+        }
+      },
+      slidePrev() {
+        if (!this.sliding && this.prevCache.length > 0) {
+          const prevCard = this.prevCache[0];
+          this.sliding = true;
+          $(`#${this.current.id}`).animate({
+            top: '100vh'
+          }, 500);
+          this.slideToCurrent(prevCard.id, 'prev');
+        }
+      },
+      slideToCurrent(id, type) {
+        $(`#${id}`).animate({
+          top: '0'
+        }, 500, () => {
+          this.sliding = false;
+          if (type === 'next') {
+            this.currentIndex++;
+          } else {
+            this.currentIndex--;
+          }
+        });
+      },
   
 }
 </script>

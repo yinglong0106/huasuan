@@ -1,6 +1,6 @@
 import apiRequest from '@/library/apiRequest'
 let local = {
-    uid:0,
+    uid:17785,
     serverHost:'https://m.xmctime.com/hsapi', //站点域名
   save (key, value) {
     localStorage.setItem(key, JSON.stringify(value))
