@@ -94,12 +94,17 @@
    <mt-actionsheet :actions="list1" v-model="visible"></mt-actionsheet>
 
    <!-- 选择音乐 -->
-   <mt-actionsheet :actions="musicArr" v-model="showMusic"></mt-actionsheet>
+   <!-- <mt-actionsheet :actions="musicArr" v-model="showMusic"></mt-actionsheet> -->
+    <van-popup v-model="showMusic" position="bottom" :overlay="false" style="height:100%;">
+        <selectMusic></selectMusic>
+    </van-popup>
+
   </div>
   </div>
 </template>
 <script type="text/javascript">
-import ImageCompressor from 'image-compressor.js'
+import ImageCompressor from 'image-compressor.js';
+import selectMusic from '@/components/selectMusic';
 import { Actionsheet } from 'mint-ui';
 import Map from '@/components/map'
 import { Toast } from 'mint-ui';
@@ -179,7 +184,8 @@ export default {
     }
   },
   components:{
-    Map
+    Map,
+    selectMusic
   },
   props: {
     idx: {
@@ -379,7 +385,6 @@ export default {
             console.log(JSON.parse(xhr.responseText))
             var resData = JSON.parse(xhr.responseText)
             if(resData.code == 200){
-              that.files = []
                that.files.push({
                 src:resData.result.host + resData.result.msg,
                 name:that.$refs.uploadImg.files[0].name,
@@ -401,9 +406,8 @@ export default {
     //发布消息
     uploadMsg(){
       var that = this,myreg=/^[1][3,4,5,7,8][0-9]{9}$/,addressComponents  = this.addressComponents 
-      console.log(that.files[0].src)
       
-      if(!that.files.length){
+      if(!that.files[0]){
          Toast('上传图片不能为空');
          return false
       }
@@ -422,7 +426,7 @@ export default {
       apiRequest.post('/index.php',{c: 'Message', action: 'add', uid: that.$local.uid, img_url:that.files[0].path,music_url:that.title2.url,
       start_salary:that.start_money,top_salary:that.end_money,descript:that.descript,module_id:that.module,telephone:that.phone,province:addressComponents.addressComponents.province,
       city:addressComponents.addressComponents.city,district:addressComponents.addressComponents.district,
-      address:addressComponents.addressComponents.street+addressComponents.addressComponents.streetNumber
+      address:addressComponents.addressComponents.street+addressComponents.addressComponents.streetNumber,img_arr:JSON.stringify(that.files)
       },
       function(res){
           // that.list = res.result
@@ -434,8 +438,9 @@ export default {
       })
           console.log(res)   
           Toast(res.msg)
+          that.files = []
           setTimeout(function(){
-            that.$router.push({path: '/my'})
+            that.$router.push({path: 'my',query:{user:'user'}})
           },2000)
       })
     },
@@ -501,8 +506,14 @@ export default {
     // },
     //删除图片
     deleteImg (name, index) {
-      console.log(name, index)
+      console.log("这是删除信息")
+      console.log(name)
+      var that = this
       this.files.splice(index, 1)
+       apiRequest.post('/index.php',{c: 'Message', action: 'delImg',uid:that.$local.uid,path:name.path,message_id:0},function(res){
+                console.log(res)
+                Toast(res.msg);
+            })
     },
     // getDataURL (file) {
     //   return new Promise((res, rej) => {
@@ -632,7 +643,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
-  z-index: 999;
+  z-index: 100;
   height: 100%;
   width: 100%;
   background: #32004b;
@@ -660,7 +671,7 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    width: 1.8rem;
+    width: 2rem;
     align-items: center;
     font-size: .26rem;
     color: #32004b;
@@ -677,7 +688,7 @@ body {
   }
   .yin{
     display: flex;
-    min-width: 1.8rem;
+    min-width: 2rem;
     max-width:2.5rem;
     align-items: center;
     text-overflow: ellipsis;
@@ -725,6 +736,7 @@ body {
   background: #fff;
   border-radius: .5rem;
   color: #32004b;
+  overflow:hidden;
   div{
     font-size: .26rem;
     margin: 0 .2rem ;
@@ -740,6 +752,7 @@ body {
     border: none;
     text-align: center;
     font-size: .26rem;
+    margin-bottom:0;
   }
 }
 //  选择地址的弹出框
@@ -750,7 +763,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 9999;
+  z-index: 100;
   overflow: scroll;
   div{
     position: fixed;

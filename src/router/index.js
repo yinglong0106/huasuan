@@ -16,6 +16,9 @@ import moneyDetail from '@/my-moneyDetails/index' //零钱明细
 import withdraw from '@/my-tixian/index' //提现记录
 import detail from '@/detail/index' //作品详情
 import singleDetail from '@/singleDetail/singleDetail' //个人详情
+import tuijian from '@/tuijian/tuijian' //推荐标签页面
+import tuijianDetail from '@/tuijianDetail/tuijianDetail' //推荐详情列表
+import editMsg from '@/editMsg/editMsg'  //编辑资料
 Vue.use(Router)
 
 let router = new Router({
@@ -137,6 +140,30 @@ let router = new Router({
         title:'信息详情'
       },
       
+    },
+    {
+      path:'/tuijian',
+      name:'tuijian',
+      component:tuijian,
+      meta:{
+        title:'推荐'
+      },
+    },
+    {
+      path:'/tuijianDetail',
+      name:'tuijianDetail',
+      component:tuijianDetail,
+      meta:{
+        title:'推荐详情'
+      },
+    },
+    {
+      path:'/editMsg',
+      name:'editMsg',
+      component:editMsg,
+      meta:{
+        title:'编辑资料'
+      },
     },
     {
       path: '*',

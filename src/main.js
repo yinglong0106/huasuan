@@ -17,6 +17,10 @@ import Local from '@/library/local'
 import Vuex from 'vuex'
 import { Swipe, SwipeItem } from 'mint-ui';
 import VueTouch from 'vue-touch'
+import Vant from 'vant';
+import 'vant/lib/index.css';
+
+Vue.use(Vant);
 Vue.component(Swipe.name, Swipe);
 Vue.component(SwipeItem.name, SwipeItem);
 Vue.use(Vuex)

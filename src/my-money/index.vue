@@ -90,7 +90,7 @@ export default {
             Toast(res.msg);
             that.tx_money = ''
             setTimeout(function(){
-                that.$router.push({path: '/my'})
+                that.$router.push({path: 'my',query:{user:'user'}})
             },2000)
         })
     },

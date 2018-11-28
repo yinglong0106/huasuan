@@ -31,7 +31,7 @@
     background:#db5443;
     border-radius:90%;
     top:-15%;
-    height:57%;
+    height:70%;
 }
 .home .mask  .el_top img{
     width:55px;
@@ -56,7 +56,7 @@
 .home .mask .el_top .kai{
     position: absolute;;
     bottom:-39px;
-    left:38%;
+    left:40%;
     z-index:50;
     background: #dabb83;
     width:75px;
