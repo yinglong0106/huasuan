@@ -39,7 +39,8 @@ let local = {
         }
            //其他情况是普通浏览器
           return 99;
-    }
+    },
+    
 }
 
 export default {

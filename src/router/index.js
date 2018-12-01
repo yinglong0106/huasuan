@@ -11,7 +11,6 @@ import myMoney from '@/my-money/index'  //我的钱包
 import myCode from '@/my-code/index'  //二维码
 import enterpriseDetails from '@/enterprise-details/index' //企业详情
 import shopDetails from '@/shop-details/index'
-import map from '@/components/map'
 import moneyDetail from '@/my-moneyDetails/index' //零钱明细
 import withdraw from '@/my-tixian/index' //提现记录
 import detail from '@/detail/index' //作品详情
@@ -19,6 +18,7 @@ import singleDetail from '@/singleDetail/singleDetail' //个人详情
 import tuijian from '@/tuijian/tuijian' //推荐标签页面
 import tuijianDetail from '@/tuijianDetail/tuijianDetail' //推荐详情列表
 import editMsg from '@/editMsg/editMsg'  //编辑资料
+import mapView from '@/map/map'
 Vue.use(Router)
 
 let router = new Router({
@@ -101,11 +101,6 @@ let router = new Router({
       }
     },
     {
-      path:'/map',
-      name:'map',
-      component:map
-    },
-    {
       path:'/moneyDetail',
       name:'moneyDetail',
       component:moneyDetail,
@@ -150,7 +145,7 @@ let router = new Router({
       },
     },
     {
-      path:'/tuijianDetail',
+      path:'/tuijianDetail/:id?',
       name:'tuijianDetail',
       component:tuijianDetail,
       meta:{
@@ -163,6 +158,14 @@ let router = new Router({
       component:editMsg,
       meta:{
         title:'编辑资料'
+      },
+    },
+    {
+      path:'/mapView',
+      name:'mapView',
+      component:mapView,
+      meta:{
+        title:'地图'
       },
     },
     {

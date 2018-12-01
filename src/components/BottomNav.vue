@@ -17,7 +17,7 @@
     <div class="footer">
         <router-link :to="{path:item.push,query:item.query}" class="h" v-for='(item,index) of items' :key="index">
           <div class="hh" :class='{on:index===idx}'>
-             <img :src="item.icon" v-if="item.icon !== ''" @click="nav = true">
+             <img :src="item.icon" v-if="item.icon !== ''" @click="openNav">
              <p>{{item.name}}</p>
           </div>
         </router-link>
@@ -60,11 +60,11 @@
 
     <div class="db" style="justify-content:flex-start;">
     <!-- 自动获取位置 -->
-      <div class="map" style="margin-left:11%;"> <img src="../../static/img/m.png">{{addr}}</div>
+      <div class="map" style="margin-left:11%;" @click="toMap"> <img src="../../static/img/m.png">{{addr}}</div>
     </div>
 
     <!-- 薪资 -->
-    <div class="xz">
+    <div class="xz" v-if="showXinzi">
       <div><img src="../../static/img/q.png" alt=""><i>薪资</i></div>
       <input type="number" placeholder="输入金额" v-model="start_money">
       <i>~</i>
@@ -96,7 +96,7 @@
    <!-- 选择音乐 -->
    <!-- <mt-actionsheet :actions="musicArr" v-model="showMusic"></mt-actionsheet> -->
     <van-popup v-model="showMusic" position="bottom" :overlay="false" style="height:100%;">
-        <selectMusic></selectMusic>
+        <selectMusic :show.sync='showMusic' @music="hasSelectmusic"></selectMusic>
     </van-popup>
 
   </div>
@@ -110,6 +110,7 @@ import Map from '@/components/map'
 import { Toast } from 'mint-ui';
 import apiRequest from '@/library/apiRequest'
 import { setTimeout } from 'timers';
+import wx from 'weixin-js-sdk';
 
 require('formdata-polyfill')
 export default {
@@ -131,8 +132,12 @@ export default {
       title3: '选择位置',
       musicInfo:null, //可选择的音乐
       musicArr:[], //选择音乐数组
+      upload_limit:'',  //限制的可传图片的张数
+      showXinzi:false, //是否是招聘模块才显示薪资
       list: [],
       list1:[],
+      lat:'',
+      lng:'',
       items2: [
         {
           values: ['旋转着','sdhsja','dasj']
@@ -225,15 +230,16 @@ export default {
       type: String
     }
   },
-
   beforeMount () {
     var that = this,arr=[]
+
     this.axios
       .post('/index.php', this.qs.stringify({c: 'Message', action: 'addPage', uid: that.$local.uid}))
       .then(
         (d) => {
           console.log("进入添加页面")
           console.log(d.data)
+          that.upload_limit =  d.data.result.upload_limit
           that.list = d.data.result.moduleInfo
           // 类型
           that.list1 = d.data.result.moduleInfo.map(item=>{
@@ -274,41 +280,35 @@ export default {
   },
   mounted () {
     // this.handleInitialImg()
-    var that = this
-     //h5定位当前位置
-        //    navigator.geolocation.getCurrentPosition(function(position){
-        //        console.log(position)
-        //     }, function(error){
-        //         console.log("Error code: " + error.code);
-        //         console.log("Error message: " + error.message);
-        //     });
-        var map = new BMap.Map("map_container");   
-        var point =  new BMap.Point(116.404, 39.915)
-        map.centerAndZoom(point, 11);      
-            // 创建地理编码实例      
-            var myGeo = new BMap.Geocoder();      
-            // 根据坐标得到地址描述    
-            myGeo.getLocation(point, function(result){      
-                if (result){      
-                    console.log(result)
-                    that.$store.commit('getLocal',{
-                        lng:result.point.lng,
-                        lat:result.point.lng,
-                        address:result.address
-                    })
-                    that.addr = result.address
-                    that.addressComponents = result
-                }else{
-                    console.log("获取地址失败")
-                }
-            });
-            console.log("容器中的地址")
-            console.log(this.$store)
+        var that = this
+        console.log(that.$store.state)
+        this.getLocal()
+
+  },
+  computed:{
+    getlat(){
+      return this.$store.state.lat
+    },
+    getlng(){
+      // alert(this.$store.state.lng)
+      return this.$store.state.lng
+    }
   },
   watch: {
     initialImg () {
       this.handleInitialImg()
     },
+    lat(){
+      this.getLocal()
+    }
+    // getlat(){
+    //   this.lat = this.$store.state.lat
+    //    this.getAddr()
+    // },
+    // getlng(){
+    //   this.lat = this.$store.state.lng
+    //    this.getAddr()
+    // }
   },
   methods: {
     // 另一种picker的函数
@@ -316,9 +316,80 @@ export default {
     //   console.log(result1)
     //   this.title = result1
     // },
+    //获取地址
+      getAddr(lng,lat){
+          var that = this,geocoder,map, marker = null;
+          var map = new BMap.Map("map_container");   
+          var point =  new BMap.Point(lng, lat)
+          map.centerAndZoom(point, 11);      
+              // 创建地理编码实例      
+              var myGeo = new BMap.Geocoder();      
+              // 根据坐标得到地址描述    
+              myGeo.getLocation(point, function(result){
+                  if (result){      
+                      console.log(result)
+                      that.$store.commit('getLocal',{
+                          lng:result.point.lng,
+                          lat:result.point.lat,
+                          address:result.address
+                      })
+                      that.addr = result.address
+                      that.addressComponents = result
+                  }else{
+                      console.log("获取地址失败")
+                  }
+              });
+          },
+      getLocal () {
+        var isWeixin = this.$local.checkBrowser(),lat,lng,that = this
+        if(isWeixin == 99){
+        //h5定位当前位置
+          navigator.geolocation.getCurrentPosition(function(position){
+              console.log('h5获取定位地址')
+              console.log(position)
+              that.lat = position.coords.latitude
+              that.lng = position.coords.longitude
+          }, function(error){
+              console.log("Error code: " + error.code);
+              console.log("Error message: " + error.message);
+          });
+        }else{
+            wx.getLocation({
+                type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                success: function (res) {
+                   that.lat = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                    that.lng = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                    var speed = res.speed; // 速度，以米/每秒计
+                    var accuracy = res.accuracy; // 位置精度
+                }
+            });
+        }
+        if(that.lat && that.lng){
+          that.$store.commit('getLocal',{
+              lng:that.lng,
+              lat:that.lat
+          })
+          that.getAddr(that.lng,that.lat)
+
+        }else{
+          setTimeout(that.getLocal,1000)
+        }
+        
+        
+    },
+    //已选的音乐
+    hasSelectmusic(data){
+      var that = this
+      console.log("父组件的音乐")
+      console.log(data)
+       that.title2 = data
+    },
     showModule(item){
       this.up = true,
       this.module = item.id
+      if(item.id == 263){
+        this.showXinzi = true
+      }
     },
 
     //类型选择
@@ -385,11 +456,16 @@ export default {
             console.log(JSON.parse(xhr.responseText))
             var resData = JSON.parse(xhr.responseText)
             if(resData.code == 200){
-               that.files.push({
-                src:resData.result.host + resData.result.msg,
-                name:that.$refs.uploadImg.files[0].name,
-                path: resData.result.msg
-              })
+              if(that.files.length< that.upload_limit){
+                that.files.push({
+                  src:resData.result.host + resData.result.msg,
+                  name:that.$refs.uploadImg.files[0].name,
+                  path: resData.result.msg
+                })
+              }else{
+                Toast(`最多只能添加${that.upload_limit}张图片`);
+              }
+               
             }else if(resData.code == 100){
                  Toast(resData.msg);
             }
@@ -403,6 +479,14 @@ export default {
       // xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.send(data)
     },
+    openNav(){
+      this.nav = true
+      this.$emit('open',"true")
+    },
+    //查看地图
+    toMap(){
+        this.$router.push({name:'mapView'})
+    },
     //发布消息
     uploadMsg(){
       var that = this,myreg=/^[1][3,4,5,7,8][0-9]{9}$/,addressComponents  = this.addressComponents 
@@ -415,10 +499,13 @@ export default {
         Toast('请选择上传音乐');
          return false
       }
-      if(!that.start_money || !that.end_money){
-        Toast('请输入薪资范围');
-         return false
+      if(that.showXinzi){
+         if(!that.start_money || !that.end_money){
+          Toast('请输入薪资范围');
+          return false
+        }
       }
+     
       if(that.phone && !myreg.test(that.phone)){
         Toast('请输入正确的手机格式');
          return false
@@ -426,16 +513,11 @@ export default {
       apiRequest.post('/index.php',{c: 'Message', action: 'add', uid: that.$local.uid, img_url:that.files[0].path,music_url:that.title2.url,
       start_salary:that.start_money,top_salary:that.end_money,descript:that.descript,module_id:that.module,telephone:that.phone,province:addressComponents.addressComponents.province,
       city:addressComponents.addressComponents.city,district:addressComponents.addressComponents.district,
-      address:addressComponents.addressComponents.street+addressComponents.addressComponents.streetNumber,img_arr:JSON.stringify(that.files)
+      address:addressComponents.addressComponents.street+addressComponents.addressComponents.streetNumber,img_arr:JSON.stringify(that.files),longitude:that.lng,latitude:that.lat
       },
       function(res){
           // that.list = res.result
           console.log("上传信息")
-          console.log({c: 'Message', action: 'add', uid: that.$local.uid, img_url:that.files[0].path,music_url:that.title2.url,
-      start_salary:that.start_money,top_salary:that.end_money,descript:that.descript,module_id:that.module,telephone:that.phone,province:addressComponents.addressComponents.province,
-      city:addressComponents.addressComponents.city,district:addressComponents.addressComponents.district,
-      address:addressComponents.addressComponents.street+addressComponents.addressComponents.streetNumber
-      })
           console.log(res)   
           Toast(res.msg)
           that.files = []

@@ -8,7 +8,7 @@
     justify-content: center;
 }
 .tuijian .tui_select div{
-    margin:0.4rem 0.24rem 0 0.24rem;
+    margin:0.4rem 0.2rem 0 0.2rem;
     border:1px solid #fff;
     border-radius:0.15rem;
     padding:0.07rem 0.2rem;
@@ -22,6 +22,7 @@
     align-items: center;
     flex-wrap:wrap;
     width:100%;
+    list-style: none;
 }
 .tuijianDetail .rows .rowItem{
     width:calc(100% / 3);
@@ -30,7 +31,7 @@
     box-sizing: border-box;
     position: relative;
     display: -webkit-box;
-    
+    list-style: none;
 }
 .tuijianDetail .rows .rowItem img{
     width:100%;
@@ -45,7 +46,7 @@
     background:rgba(0, 0, 0, 0.6);
     color:#fff;
     font-size:10px;
-    height:44px;
+    max-height:44px;
     overflow: hidden;
 }
 .tuijianDetail .rows .rowItem .bomText span{

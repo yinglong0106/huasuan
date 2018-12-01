@@ -19,5 +19,6 @@ export default {
 <style>
   body{
     background: #32004b;
+    /* background-image: -moz-linear-gradient(top,#fff,#32004b,#fff); */
   }
 </style>

@@ -1,15 +1,15 @@
 <template>
   <div class="my">
     <!-- 头像名字 -->
-    <div class="head">
+    <div class="head" @click="editUser">
       <img :src="imageUrl" class="head_left">
       <div class="head_right">
         <span class="one">{{nikeName}}</span>
         <span class="two">划算号：{{id}}</span>
-        <!-- <div class="three">
-          <div class="three_left"><img :src="sex=='男'?'../../static/img/my_man.png':'../../static/img/my_woman.png'" alt=""><span>{{age}}岁</span></div>
+        <div class="three">
+          <div class="three_left"><img :src="sex=='男'?'../../static/img/my_man.png':'../../static/img/my_woman.png'" alt=""><span>{{birthday}}</span></div>
           <div class="three_right"><span>{{City}}</span></div>
-        </div> -->
+        </div>
       </div>
     </div>
     <!-- 关注购物车等 -->
@@ -82,6 +82,7 @@ export default {
       City: '',
       follow_number: '',
       befollow_number: '',
+      birthday:'',
       like_number: '',
       mywork:null, //作品
       myfocus:null, //我的关注
@@ -111,6 +112,7 @@ export default {
           console.log({c: 'User', action: that.$route.query.user == 'user'?'index':"detail", link_url: url, uid:this.$local.uid,detail_id:that.detail_id})
           console.log(d.data)
           if(that.$route.query.user == 'user'){
+            this.birthday = d.data.result.uInfo.birthday
             this.id = d.data.result.uInfo.id
             this.nikeName = d.data.result.uInfo.nikeName
             this.imageUrl = d.data.result.uInfo.imageUrl
@@ -123,6 +125,7 @@ export default {
             this.proList = this.active == 0?d.data.result.mywork:d.data.result.myfocus
             this.mywork = d.data.result.mywork?d.data.result.mywork:[]
             this.myfocus = d.data.result.myfocus?d.data.result.myfocus:[]
+            
           }else{
             this.id = d.data.result.userInfo.id
             this.nikeName = d.data.result.userInfo.nikeName
@@ -136,7 +139,8 @@ export default {
             this.proList = this.active == 0?d.data.result.userWork:d.data.result.userFocus
             this.mywork = d.data.result.mywork?d.data.result.userWork:[]
             this.myfocus = d.data.result.myfocus?d.data.result.userFocus:[],
-            this.isFollow = d.data.result.isFollow
+            this.isFollow = d.data.result.isFollow,
+             this.birthday = d.data.result.userInfo.birthday
           }
         }
       )
@@ -205,6 +209,15 @@ export default {
          this.$router.push({name:'detail',params:{id:item.id}})
       }
      
+    },
+
+    //跳转编辑用户信息
+    editUser(){
+      var that = this
+      if(that.userType == 'user'){
+        this.$router.push({name:'editMsg'})
+      }
+      
     }
   }
 }
@@ -251,13 +264,14 @@ export default {
         display: flex;
         align-items: center;
         .three_left{
-          width: 1rem;
+          // width: 1rem;
           height: .33rem;
           border-radius: .05rem;
           display: flex;
           align-items: center;
           background: #9980a5;
           justify-content: center;
+          padding:0 0.1rem;
           img{
             width: .16rem;
             height: .16rem;
@@ -277,6 +291,8 @@ export default {
           justify-content: center;
           align-items: center;
           margin-left: .32rem;
+          text-align:center;
+          
           span{
             color: #fff;
             font-size: .2rem;

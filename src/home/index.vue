@@ -96,7 +96,7 @@
           </div>
         </div>
     </div>
-    <BNai :idx="0"></BNai>
+    <BNai :idx="0" @open="openNav"></BNai>
   </div>
 </template>
 
@@ -142,7 +142,9 @@ export default {
       shareInfo : null,  //分享信息
       config : null,
       // content:["/static/img/a.png","/static/img/b.png","/static/img/c.png"],
-      defaultNav:0  //0为推荐 1为分类
+      defaultNav:0,  //0为推荐 1为分类
+      lat:'',
+      lng:''
     }
   },
  
@@ -164,10 +166,9 @@ export default {
         //     }
         // })
         var that = this
-      that.wxShare()
-         
+        this.wxShare() 
   },
-
+  
   beforeMount(){
     var that = this
     //初始化轮播插件配置
@@ -217,6 +218,9 @@ export default {
               that.prv = that.currentIndex+1
                $(".musicfx")[that.prv].pause()
               $(".musicfx")[this.activeIndex].play()
+               document.addEventListener("WeixinJSBridgeReady", function () { 
+                   $(".musicfx")[this.activeIndex].play()
+              }, false);
             },
             // 向下滑动
             slideNextTransitionEnd:function(){
@@ -225,6 +229,9 @@ export default {
               that.prv = that.currentIndex-1
                $(".musicfx")[that.prv].pause()
               $(".musicfx")[this.activeIndex].play()
+               document.addEventListener("WeixinJSBridgeReady", function () { 
+                   $(".musicfx")[this.activeIndex].play()
+              }, false);
             },
           },
           // 左右点击
@@ -259,19 +266,58 @@ export default {
           
         }
   },
+
   watch:{
      music_url: function (newVal, oldVal) {
        var that = this
-       if(this.currentIndex = 0){
-         if(this.music_url){
-           $(".musicfx")[0].play()
-         }
-       }
+      //  if(this.currentIndex = 0){
+      //    if(this.music_url){
+      //      $(".musicfx")[0].play()
+      //    }
+      //  }
       
+    },
+
+    defaultNav(){
+      if(this.defaultNav == 1){
+        this.$router.push({path:'/tuijian'})
+      }
     }
   },
   methods: {
-    
+    getLocal () {
+        var isWeixin = this.$local.checkBrowser(),lat,lng,that = this
+        if(isWeixin == 99){
+        //h5定位当前位置
+          navigator.geolocation.getCurrentPosition(function(position){
+              console.log('h5获取定位地址')
+              console.log(position)
+              that.lat = position.coords.latitude
+              that.lng = position.coords.longitude
+          }, function(error){
+              console.log("Error code: " + error.code);
+              console.log("Error message: " + error.message);
+          });
+        }else{
+            wx.getLocation({
+                type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                success: function (res) {
+                   that.lat = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                    that.lng = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                    var speed = res.speed; // 速度，以米/每秒计
+                    var accuracy = res.accuracy; // 位置精度
+                }
+            });
+        }
+        that.$store.commit('getLocal',{
+            lng:that.lng,
+            lat:that.lat
+        })
+        return {
+            lat:that.lat,
+            lng:that.lng
+        }
+    },
     //微信分享
     wxShare(){
           var globalConfig = {},that = this;
@@ -362,8 +408,10 @@ export default {
             } 
           }
 
-
       })
+    },
+    openNav(){
+      $(".musicfx")[this.currentIndex].pause()
     },
     //拨打电话
     callPhone (phoneNumber) {
@@ -375,6 +423,7 @@ export default {
     fen (item) {
       // this.fenx = true 
       // this.showShareImg=true //显示分享图片
+      console.log(item)
       this.$router.push({name:'singleDetail',query:{id:item.id}})
       // this.type = 2 //定义分享id为个人id
       // this.shareId = item.id //当前分享信息的id
@@ -746,7 +795,7 @@ body {
     left:0;
     right: 0;
     bottom:0;
-
+    height:1rem;
   }
   .mask{
       .rotating {

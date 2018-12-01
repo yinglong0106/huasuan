@@ -1,55 +1,161 @@
 <template>
     <div class="selectMusic">
         <div class="topNav">
-            <i class="iconfont icon-cha"></i>
+            <i class="iconfont icon-cha" @click="close"></i>
             <div class="title">选择音乐</div>
             <div></div>
         </div>
         <div class="search">
-            <i class="iconfont icon-sousuo"></i>
-            <input type="text" placeholder="搜索歌曲名称">
+            <i class="iconfont icon-sousuo" @click="write"></i>
+            <input type="text" v-model.lazy="sousuoValue" placeholder="搜索歌曲名称" @blur="write">
         </div>
         <div class="selectType">
-            <div>热门推荐</div>
-            <div class="secactive">我收藏的</div>
+            <div :class="{'secactive':type==1}" @click="type=1">热门推荐</div>
+            <div :class="{'secactive':type==2}" @click="type=2">我收藏的</div>
         </div>
-        <ul>
-            <li class="li">
-                <div class="liLeft">
-                    <img src="/static/img/a.png" alt="">
-                    <div class="name">
-                        <div>沙漠骆驼</div>
-                        <div>展展与罗罗</div>
+        <mt-loadmore :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
+            <ul>
+                <li class="li" v-for="(item,index) in list" :key="index">
+                    <div class="liLeft" @click="secMusic(item,index)">
+                        <img :src="item.img_url" alt="">
+                        <div class="name">
+                            <div>{{item.title}}</div>
+                            <div>{{item.author}}</div>
+                        </div>
                     </div>
-                </div>
-                <div class="right">
-                    <i class="iconfont icon-star"></i>
-                    <i class="iconfont icon-play"></i>
-                </div>
-            </li>
-            <li class="li">
-                <div class="liLeft">
-                    <img src="/static/img/a.png" alt="">
-                    <div class="name">
-                        <div>沙漠骆驼</div>
-                        <div>展展与罗罗</div>
+                    <div class="right">
+                        <i class="iconfont" :class="item.status==1?'icon-active_star':'icon-star'" @click="shoucang(item)"></i>
+                        <i class="iconfont" :class="item.isPlay == true?'icon-pause':'icon-play'" @click="playMusic(index,item)"></i>
+                         <audio loop :class="['musicfx'+index,'audio']"  controls="controls" style="opacity:0;position:absolute;z-index:1;">
+                            <source class="source" :src="item.fullurl" type="audio/mp3" ref="musicfx"/>
+                        </audio>
                     </div>
-                </div>
-                <div class="right">
-                    <i class="iconfont icon-star"></i>
-                    <i class="iconfont icon-play"></i>
-                </div>
-            </li>
-        </ul>
+                </li>
+            </ul>
+        </mt-loadmore>
     </div>
 </template>
 <script>
+    import apiRequest from '@/library/apiRequest'
+    import { Toast } from 'mint-ui';
     export default {
+        props:["show"],
         data(){
             return{
+                type:1,  //1为推荐,2为收藏
+                rows:10, //每页请求的数量
+                page:1,  //页数
+                list:null,
+                sousuoValue:'', //搜索框的值
+                selectItem:null,  //已选音乐
+                allLoaded:false
+            }
+        },
+        computed:{
+            initShow(){
+                return this.show
+            }
+        },
+        mounted(){
+            this.initData()
+            $('.li').each(item=>{
+                    console.log(item) 
+                    $('.li').eq(item).removeClass("li_active")
+            })
+        },
+        watch:{
+            type(){
+                this.page = 1
+                this.initData()
+            }
+        },
+        methods:{
+        //加载更多
+            loadBottom(){
+                var that = this
+                that.page++
+                that.initData()
+                this.$refs.loadmore.onBottomLoaded();
+            },
+            //关闭音乐弹窗
+            close(){
+                var that = this
+                this.$emit("update:show",!this.initShow)
+                $('.audio').each(item=>{
+                    console.log(item) 
+                    $('.audio')[item].pause()
+                })
+                this.page = 1
+                that.initData()
+            },
+            //初始化数据
+            initData(){
+                var that = this
+                apiRequest.post('/index.php',{c: 'Message', action: 'musicList',uid: that.$local.uid,type:that.type,rows:that.rows,page:that.page,keyword:that.sousuoValue},function(res){
+                    console.log("获取音乐类信息")
+                    console.log(res)
+                    that.sousuoValue = ''
+                    if(that.page == 1){
+                        that.list = res.result
+                    }else{
+                        that.list = that.list.concat(res.result)
+                    }
+                    
+                })
+            },
+            
+            //失去焦点
+            write(){
+                console.log("失去焦点")
+                console.log(this.sousuoValue)
+                var that = this
+                if(that.sousuoValue){
+                    this.page = 1;
+                    that.initData()
+                }
+                    
+            },
 
+            //收藏
+            shoucang(item){
+                var that = this
+                console.log(item)
+                item.status = item.status==1?0:1
+                 apiRequest.post('/index.php',{c: 'Message', action: 'collectMusic',uid: that.$local.uid,collect_type:item.status==1?1:2,music_id:item.id},function(res){
+                    console.log("收藏音乐")
+                    console.log(res)
+                     Toast(res.msg);
+                })
+            },
+
+            // 播放或暂停音乐
+            playMusic(index,item){
+                    console.log("点击播放音乐")
+                    console.log($(`.musicfx${index}`)[0].paused)
+                    if($(`.musicfx${index}`)[0].paused){
+                         $(`.musicfx${index}`)[0].play()
+                         item.isPlay = true
+                    }else{
+                        $(`.musicfx${index}`)[0].pause()
+                        item.isPlay = false
+                    }
+                       
+            },
+
+            //选中某项音乐
+            secMusic(item,index){
+                var that = this
+                $('.li').each(item=>{
+                    console.log(item) 
+                    $('.li').eq(item).removeClass("li_active")
+                })
+                $('.li').eq(index).addClass("li_active")
+                this.selectItem = item
+                this.$emit("music",item)
+                this.close()
             }
         }
+
     }
 </script>
 <style scoped>
@@ -113,9 +219,15 @@
     .selectType div{
         text-align:center;
     }
+    .li_active{
+        /* border:2px solid #ff0030; */
+        box-shadow: 0 0 10px #ff0030;
+    }
     .li{
-        width:100%;
+        /* width:100%; */
+        margin:0 0.2rem;
         box-sizing:border-box;
+        border-radius:8px;
         padding:0.15rem 0.2rem;
         display:flex;
         justify-content: space-between;
@@ -145,9 +257,15 @@
        height:1.2rem;
        border-radius:0.1rem;
    }
+   .li .right{
+       position:relative;
+   }
    .li .right .iconfont:nth-child(1){
-       color:#222;
+       color:#333;
        font-size:25px;
+   }
+   .li .right .icon-active_star{
+       color:#edce01 !important;
    }
    .li .right .iconfont:nth-child(2){
         color:#222;

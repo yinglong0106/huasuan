@@ -137,8 +137,7 @@ export default {
         var that = this
         console.log('信息页面')
         console.log(this.$route.query.id)
-        that.initData()
-         
+        that.initData() 
   },
   methods: {
 
