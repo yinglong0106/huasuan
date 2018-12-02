@@ -30,6 +30,12 @@
         methods:{
             toDetail(item){
                 console.log(item)
+                //存储模块id
+                // this.$store.commit("tuijian",{
+                //    id:item.id,
+                //    title:item.className
+                // })
+                // this.$router.push({name:'tuijianDetail'})
                 this.$router.push({
                     name:'tuijianDetail',
                     query:{id:item.id,title:item.className}

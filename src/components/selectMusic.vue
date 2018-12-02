@@ -1,5 +1,5 @@
 <template>
-    <div class="selectMusic">
+    <div class="selectMusic" >
         <div class="topNav">
             <i class="iconfont icon-cha" @click="close"></i>
             <div class="title">选择音乐</div>
@@ -13,8 +13,13 @@
             <div :class="{'secactive':type==1}" @click="type=1">热门推荐</div>
             <div :class="{'secactive':type==2}" @click="type=2">我收藏的</div>
         </div>
-        <mt-loadmore :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore">
-            <ul>
+        <!-- <mt-loadmore :bottom-method="loadBottom" :bottom-all-loaded="allLoaded" ref="loadmore"> -->
+      <van-list
+            v-model="loading"
+            :finished="finished"
+            @load="initData"
+            :offset="30">
+            <ul class="content">
                 <li class="li" v-for="(item,index) in list" :key="index">
                     <div class="liLeft" @click="secMusic(item,index)">
                         <img :src="item.img_url" alt="">
@@ -26,18 +31,21 @@
                     <div class="right">
                         <i class="iconfont" :class="item.status==1?'icon-active_star':'icon-star'" @click="shoucang(item)"></i>
                         <i class="iconfont" :class="item.isPlay == true?'icon-pause':'icon-play'" @click="playMusic(index,item)"></i>
-                         <audio loop :class="['musicfx'+index,'audio']"  controls="controls" style="opacity:0;position:absolute;z-index:1;">
+                        <audio loop :class="['musicfx'+index,'audio']"  controls="controls" style="opacity:0;position:absolute;z-index:1;">
                             <source class="source" :src="item.fullurl" type="audio/mp3" ref="musicfx"/>
                         </audio>
                     </div>
                 </li>
             </ul>
-        </mt-loadmore>
+        </van-list>
+        <!-- </mt-loadmore> -->
     </div>
 </template>
 <script>
     import apiRequest from '@/library/apiRequest'
     import { Toast } from 'mint-ui';
+    import BScroll from 'better-scroll'
+import { setTimeout } from 'timers';
     export default {
         props:["show"],
         data(){
@@ -45,10 +53,13 @@
                 type:1,  //1为推荐,2为收藏
                 rows:10, //每页请求的数量
                 page:1,  //页数
-                list:null,
+                list:[],
                 sousuoValue:'', //搜索框的值
                 selectItem:null,  //已选音乐
-                allLoaded:false
+                allLoaded:false,
+                 loading: false,
+                finished: false,
+                flag:true
             }
         },
         computed:{
@@ -57,11 +68,33 @@
             }
         },
         mounted(){
-            this.initData()
+            var that = this
+            this.list = []
+            // this.initData()
             $('.li').each(item=>{
                     console.log(item) 
                     $('.li').eq(item).removeClass("li_active")
             })
+
+            // this.scroll = new BScroll(that.$refs.wrapper1, {
+            //     // 上拉加载
+            //     pullUpLoad: {
+            //         // 当上拉距离超过30px时触发 pullingUp 事件
+            //         threshold: -30
+            //         },
+            //          probeType:2,
+            //         mouseWheel: true, click: true, tap: true
+            //     })
+            //     that.scroll.on('pullingUp', () => {
+            //         console.log('处理上拉加载操作')
+            //         that.page=that.page+1
+            //         that.initData()  
+            //         setTimeout(() => {
+            //             // 事情做完，需要调用此方法告诉 better-scroll 数据已加载，否则上拉事件只会执行一次
+            //             that.scroll.finishPullUp()
+            //         }, 2000)
+            // })
+
         },
         watch:{
             type(){
@@ -71,12 +104,12 @@
         },
         methods:{
         //加载更多
-            loadBottom(){
-                var that = this
-                that.page++
-                that.initData()
-                this.$refs.loadmore.onBottomLoaded();
-            },
+            // loadBottom(){
+            //     var that = this
+            //     that.page++
+            //     that.initData()
+            //     this.$refs.loadmore.onBottomLoaded();
+            // },
             //关闭音乐弹窗
             close(){
                 var that = this
@@ -88,6 +121,7 @@
                 this.page = 1
                 that.initData()
             },
+
             //初始化数据
             initData(){
                 var that = this
@@ -95,12 +129,22 @@
                     console.log("获取音乐类信息")
                     console.log(res)
                     that.sousuoValue = ''
-                    if(that.page == 1){
-                        that.list = res.result
-                    }else{
+                    if(that.flag){
+                        that.flag = false
                         that.list = that.list.concat(res.result)
+                        that.page++
                     }
-                    
+                    that.loading = false;
+                    setTimeout(function(){
+                        that.flag = true
+                    },1000)
+                   
+                },false,function(){
+                     // 数据全部加载完成
+                     that.flag = false
+                    that.loading = false;
+                    that.finished = true;
+                    console.log(that.page)
                 })
             },
             
