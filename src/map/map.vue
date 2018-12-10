@@ -7,14 +7,22 @@
     export default {
         data(){
             return {
-                config:null
+                config:null,
+                lat:'',
+                lng:''
             }
         },
         mounted(){
             var that = this
-            console.log(that.$store.state)
-            // alert(that.$store.state.lat)
-            // alert(that.$store.state.lng)
+            console.log(this.$route.params)
+             if(this.$route.params.lat){
+                    this.lat = this.$route.params.lat
+                    this.lng = this.$route.params.lng
+                }else{
+                    this.lat = that.$store.state.lat
+                    this.lng = that.$store.state.lng
+                }
+           alert(this.lat)
              apiRequest.post('/index.php',{c: 'Home', action: 'shareConfig',link_url:location.href,id: '',type:1},function(res){
                     console.log("获取信息")
                     console.log(res)
@@ -43,8 +51,8 @@
             getLocation(){
                 var that = this
                 wx.openLocation({  
-                    latitude: that.$store.state.lat, // 纬度，浮点数，范围为90 ~ -90  
-                    longitude: that.$store.state.lng, // 经度，浮点数，范围为180 ~ -180。  
+                    latitude: that.lat, // 纬度，浮点数，范围为90 ~ -90  
+                    longitude: that.lng, // 经度，浮点数，范围为180 ~ -180。  
                     name: '我现在在这里', // 位置名  
                     address: $("#nowAdd").text(), // 地址详情说明  
                     scale: 20, // 地图缩放级别,整形值,范围从1~28。默认为最大  

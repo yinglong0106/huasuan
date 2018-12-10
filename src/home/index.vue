@@ -47,9 +47,9 @@
           </audio>
         </li>
         <ul class="right">
-          <li class="right1">#{{item.module_name}}#</li>
+          <li class="right1" @click="toTuijianDetail(item)">#{{item.module_name}}#</li>
           <li class="right2">{{item.username}}</li>
-          <li class="right3" v-if="item.address != null"> <img src="../../static/img/map.png" alt="" class="map"><span>{{item.address}}</span></li>
+          <li class="right3" @click="toMap(item.latitude,item.longitude)" v-if="item.address != null"> <img src="../../static/img/map.png" alt="" class="map"><span>{{item.address}}</span></li>
           <li class="right4"> <img src="../../static/img/money.png" alt="" class="money"><span>{{item.start_salary}}~{{item.top_salary}}元</span></li>
           <li class="right5">{{item.descript}}</li>
         </ul>
@@ -213,13 +213,12 @@ export default {
             // 向上滑动
             slidePrevTransitionEnd:function(){
               console.log("向上滑动：")
-              
               console.log(this)
               that.prv = that.currentIndex+1
                $(".musicfx")[that.prv].pause()
               $(".musicfx")[this.activeIndex].play()
                document.addEventListener("WeixinJSBridgeReady", function () { 
-                   $(".musicfx")[this.activeIndex].play()
+                   $(".musicfx")[that.activeIndex].play()
               }, false);
             },
             // 向下滑动
@@ -230,7 +229,7 @@ export default {
                $(".musicfx")[that.prv].pause()
               $(".musicfx")[this.activeIndex].play()
                document.addEventListener("WeixinJSBridgeReady", function () { 
-                   $(".musicfx")[this.activeIndex].play()
+                   $(".musicfx")[that.activeIndex].play()
               }, false);
             },
           },
@@ -270,11 +269,14 @@ export default {
   watch:{
      music_url: function (newVal, oldVal) {
        var that = this
-      //  if(this.currentIndex = 0){
-      //    if(this.music_url){
-      //      $(".musicfx")[0].play()
-      //    }
-      //  }
+       if(this.currentIndex = 0){
+         if(this.music_url){
+           $(".musicfx")[0].play()
+         }
+       }
+         document.addEventListener("WeixinJSBridgeReady", function () { 
+                   $(".musicfx")[0].play()
+            }, false);
       
     },
 
@@ -519,6 +521,18 @@ export default {
             //回调
             callback && callback()
         });
+    },
+    //跳转到地图
+   toMap(lat,lng){
+        this.$router.push({name:'mapView',params:{lat:lat,lng:lng}})
+    },
+    //跳转到具体的推荐标签
+    toTuijianDetail(item){
+      console.log(item)
+       this.$router.push({
+              name:'tuijianDetail',
+              query:{id:item.module_id,title:item.module_name}
+          })
     }
   },
   

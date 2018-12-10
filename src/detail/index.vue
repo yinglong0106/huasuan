@@ -35,7 +35,7 @@
                     <div>选择模块:</div>
                     <div style="width:75%;overflow:hidden;text-overflow: ellipsis;white-space: nowrap;" class="yin" @click="showModule = true">{{module1.className}}</div>
                 </div>
-                 <div class="row">
+                 <div class="row" v-if="module1.className=='求职招聘'">
                     <div >薪资:</div>
                      <div class="range">
                          <input class="xin" type="number" v-model="startMoney">
@@ -93,8 +93,8 @@
         </div>
 
         <!-- 作品置顶 -->
-        <div class="tuiguang" style="padding:1.5rem 0.4rem;" v-if="active==2">
-             <div class="tuiItem">
+        <div class="tuiguang" style="padding:1.5rem 0.6rem;" v-if="active==2">
+             <div class="tuiItem" style="padding:0.2rem 0.35rem">
                 <input type="text" disabled v-model="zhidingName" style="text-align:center;font-size:0.32rem;width:90%;" placeholder="选择置顶时长"> 
                 <div class="right">
                     <img @click="showZhi" src="/static/img/single.png" alt="">
@@ -523,13 +523,16 @@ export default {
         margin-top:0.2rem;
     }
     .myWork .message .row div:nth-child(1){
-          margin-right:0.2rem;
+          width:1.8rem;
     }
     .myWork .message input,.tuiguang input{
          outline: none;
         background:none;
         border:0;
         font-size:0.29rem;
+        margin-bottom:0!important;
+        height:0.42rem !important;
+        line-height: 0.42rem !important;
     }   
     .myWork .message .phone .input{
         color:#fff;
@@ -600,7 +603,7 @@ export default {
     }
     
     .tuiguang{
-        padding:0.8rem 0.5rem;
+        padding:0.8rem 0.6rem;
         position: relative;
     }
     .tuiItem{
@@ -609,7 +612,7 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding:0.25rem 0.35rem;
+        padding:0.2rem 0.35rem;
         font-size:0.27rem;
         color:#111;
         margin-top:0.4rem;
@@ -633,13 +636,13 @@ export default {
         background:none;
         border:0;
         text-align: right;
-        margin-right:0.2rem;
+        margin-right:0.0rem;
     }
     .tuiguang .suiji{
         color:#fff;
         font-size:0.2rem;
         padding:0 0.4rem;
-        margin-top:0rem;
+        margin-top:0.08rem;
     }
     .tuiguang .allMoney{
         padding:0 0.35rem;
@@ -654,7 +657,7 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
-        padding:0.25rem 0.35rem;
+        padding:0.2rem 0.35rem;
         font-size:0.32rem;
         color:#fff;
         margin-top:0.4rem;
